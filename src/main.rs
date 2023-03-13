@@ -1,5 +1,6 @@
 use raylib::prelude::*;
 
+// structs for defining the objects
 struct Ball {
     x: f32,
     y: f32,
@@ -7,12 +8,6 @@ struct Ball {
     velocity_y: f32,
     radius: f32,
 }
-impl Ball {
-    fn draw(&mut self, d: &mut RaylibDrawHandle) {
-        d.draw_circle(self.x as i32, self.y as i32, self.radius, Color::WHITE);
-    }
-}
-
 struct Paddle {
     x: f32,
     y: f32,
@@ -20,6 +15,33 @@ struct Paddle {
     width: f32,
     height: f32,
 }
+
+// drawing functions for the objects
+impl Ball {
+    fn draw(&mut self, d: &mut RaylibDrawHandle) {
+        d.draw_circle(self.x as i32, self.y as i32, self.radius, Color::WHITE);
+    }
+
+    fn update(&mut self, d: &RaylibDrawHandle){
+        self.x += self.velocity_x * d.get_frame_time();
+        self.y += self.velocity_y * d.get_frame_time();
+
+
+        if self.y <= 1. {
+            self.velocity_y *= -1.;
+            self.y = 1.;
+        }
+
+        if self.y >= d.get_screen_height() as f32 {
+            self.velocity_y *= -1.;
+            self.y = d.get_screen_height() as f32 - 1.;
+        }
+
+
+
+    }
+}
+
 impl Paddle {
     fn get_rect(&mut self) -> Rectangle {
         rrect(
@@ -33,6 +55,8 @@ impl Paddle {
         d.draw_rectangle_rec(self.get_rect(), Color::WHITE);
     }
 }
+
+
 
 fn main() {
     //initialize window and raylib
@@ -119,19 +143,8 @@ fn main() {
         ball.draw(&mut d);
         left_paddle.draw(&mut d);
         right_paddle.draw(&mut d);
+        ball.update(&d);
 
-        ball.x += ball.velocity_x * d.get_frame_time();
-        ball.y += ball.velocity_y * d.get_frame_time();
-
-        if ball.y <= 1. {
-            ball.velocity_y *= -1.;
-            ball.y = 1.;
-        }
-
-        if ball.y >= d.get_screen_height() as f32 {
-            ball.velocity_y *= -1.;
-            ball.y = d.get_screen_height() as f32 - 1.;
-        }
 
         if ball.velocity_x > 0. {
             right_paddle.velocity = ((300. * ball.velocity_x) / 100.) / 2.;
